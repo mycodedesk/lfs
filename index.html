@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#09090b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>LSF. — Lifestyle Fashion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            lsf: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #09090b; color: #fff; overscroll-behavior: none; }
+    ::-webkit-scrollbar { width: 0; height: 0; }
+
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+    .drawer-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .drawer-left { transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .drawer-left.active { transform: translateX(0); }
+
+    .drawer-right { transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .drawer-right.active { transform: translateX(0); }
+
+    .search-overlay { opacity: 0; pointer-events: none; transform: translateY(-20px); transition: all 0.3s ease; }
+    .search-overlay.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+    .page-view { display: none; opacity: 0; transition: opacity 0.25s ease; }
+    .page-view.active { display: block; opacity: 1; }
+
+    .lookbook-snap { scroll-snap-type: y mandatory; overflow-y: auto; height: calc(100dvh - 130px); }
+    .lookbook-item { scroll-snap-align: start; height: calc(100dvh - 130px); }
+
+    .heart-btn.liked iconify-icon { color: #ef4444; }
+    .heart-btn.liked { background: rgba(239,68,68,0.15); }
+
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .anim-slide-up { animation: slideUp 0.5s ease forwards; }
+
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    .anim-fade { animation: fadeIn 0.4s ease forwards; }
+
+    @keyframes pulse-dot { 0%,100% { transform:scale(1); } 50% { transform:scale(1.5); } }
+    .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+    .swiper-pagination-bullet { background: rgba(255,255,255,0.4) !important; width: 6px !important; height: 6px !important; transition: all 0.3s !important; }
+    .swiper-pagination-bullet-active { background: #fff !important; width: 20px !important; border-radius: 3px !important; }
+
+    .brand-swiper .swiper-slide { width: 75% !important; }
+
+    .toast { transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .product-card { transition: transform 0.3s ease; }
+    .product-card:active { transform: scale(0.97); }
+
+    .category-pill:active { transform: scale(0.92); }
+    .category-pill { transition: transform 0.2s ease; }
+
+    .bottom-nav-item { transition: all 0.2s ease; }
+    .bottom-nav-item.active iconify-icon { color: #818cf8; }
+    .bottom-nav-item.active span { color: #818cf8; }
+
+    .qty-btn:active { transform: scale(0.85); }
+    .qty-btn { transition: transform 0.15s ease; }
+
+    input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+  </style>
+</head>
+<body class="max-w-[480px] mx-auto relative overflow-x-hidden bg-[#09090b] min-h-screen">
+
+  <!-- ========== TOP BAR ========== -->
+  <header id="topBar" class="fixed top-0 left-0 right-0 z-50 max-w-[480px] mx-auto">
+    <div class="bg-[#09090b]/90 backdrop-blur-xl border-b border-white/5">
+      <div class="flex items-center justify-between px-4 h-14">
+        <!-- Left -->
+        <div class="flex items-center gap-3">
+          <button onclick="toggleDrawer('menu')" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/5 active:scale-90 transition-transform">
+            <iconify-icon icon="lucide:menu" width="22" class="text-zinc-200"></iconify-icon>
+          </button>
+          <div class="flex items-center gap-1">
+            <span class="text-lg font-semibold tracking-tight text-white">LSF<span class="text-lsf-400">.</span></span>
+          </div>
+        </div>
+        <!-- Right -->
+        <div class="flex items-center gap-1">
+          <button onclick="toggleSearch()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/5 active:scale-90 transition-transform">
+            <iconify-icon icon="lucide:search" width="20" class="text-zinc-300"></iconify-icon>
+          </button>
+          <button onclick="switchPage('wishlist')" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/5 active:scale-90 transition-transform relative">
+            <iconify-icon icon="lucide:heart" width="20" class="text-zinc-300"></iconify-icon>
+            <span id="wishCountBadge" class="hidden absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+          </button>
+          <button onclick="toggleDrawer('cart')" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/5 active:scale-90 transition-transform relative">
+            <iconify-icon icon="lucide:shopping-bag" width="20" class="text-zinc-300"></iconify-icon>
+            <span id="cartCountBadge" class="hidden absolute top-1 right-1 w-4 h-4 bg-lsf-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+          </button>
+        </div>
+      </div>
+      <!-- Location Bar -->
+      <div class="flex items-center gap-2 px-4 pb-2.5">
+        <iconify-icon icon="lucide:map-pin" width="13" class="text-lsf-400"></iconify-icon>
+        <span class="text-xs text-zinc-400" id="locationText">Deliver to <span class="text-zinc-200 font-medium">110001</span></span>
+        <iconify-icon icon="lucide:chevron-down" width="12" class="text-zinc-500"></iconify-icon>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== MENU DRAWER ========== -->
+  <div id="menuOverlay" class="drawer-overlay fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" onclick="toggleDrawer('menu')"></div>
+  <aside id="menuDrawer" class="drawer-left fixed top-0 left-0 bottom-0 z-[70] w-[300px] max-w-[80vw] bg-[#0f0f12] border-r border-white/5">
+    <div class="flex items-center justify-between px-5 h-14 border-b border-white/5">
+      <span class="text-lg font-semibold tracking-tight">LSF<span class="text-lsf-400">.</span></span>
+      <button onclick="toggleDrawer('menu')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10">
+        <iconify-icon icon="lucide:x" width="18" class="text-zinc-400"></iconify-icon>
+      </button>
+    </div>
+    <nav class="py-4">
+      <p class="px-5 text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-3">Categories</p>
+      <button onclick="filterByCategory('party');toggleDrawer('menu')" class="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors">
+        <iconify-icon icon="lucide:sparkles" width="18" class="text-purple-400"></iconify-icon>
+        <span class="text-sm text-zinc-200">Party Wear</span>
+        <iconify-icon icon="lucide:chevron-right" width="14" class="text-zinc-600 ml-auto"></iconify-icon>
+      </button>
+      <button onclick="filterByCategory('regular');toggleDrawer('menu')" class="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors">
+        <iconify-icon icon="lucide:shirt" width="18" class="text-blue-400"></iconify-icon>
+        <span class="text-sm text-zinc-200">Regular Wear</span>
+        <iconify-icon icon="lucide:chevron-right" width="14" class="text-zinc-600 ml-auto"></iconify-icon>
+      </button>
+      <button onclick="filterByCategory('sports');toggleDrawer('menu')" class="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors">
+        <iconify-icon icon="lucide:dumbbell" width="18" class="text-green-400"></iconify-icon>
+        <span class="text-sm text-zinc-200">Sports</span>
+        <iconify-icon icon="lucide:chevron-right" width="14" class="text-zinc-600 ml-auto"></iconify-icon>
+      </button>
+      <button onclick="filterByCategory('season');toggleDrawer('menu')" class="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors">
+        <iconify-icon icon="lucide:sun" width="18" class="text-amber-400"></iconify-icon>
+        <span class="text-sm text-zinc-200">Season Special</span>
+        <iconify-icon icon="lucide:chevron-right" width="14" class="text-zinc-600 ml-auto"></iconify-icon>
+      </button>
+
+      <div class="my-4 border-t border-white/5"></div>
+      <p class="px-5 text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-3">Quick Links</p>
+      <button onclick="switchPage('lookbook');toggleDrawer('menu')" class="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors">
+        <iconify-icon icon="lucide:clapperboard" width="18" class="text-lsf-400"></iconify-icon>
+        <span class="text-sm text-zinc-200">Lookbook</span>
+      </button>
+      <button class="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors">
+        <iconify-icon icon="lucide:truck" width="18" class="text-zinc-400"></iconify-icon>
+        <span class="text-sm text-zinc-200">Track Order</span>
+      </button>
+      <button class="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors">
+        <iconify-icon icon="lucide:user" width="18" class="text-zinc-400"></iconify-icon>
+        <span class="text-sm text-zinc-200">My Account</span>
+      </button>
+      <button class="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors">
+        <iconify-icon icon="lucide:settings" width="18" class="text-zinc-400"></iconify-icon>
+        <span class="text-sm text-zinc-200">Settings</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- ========== CART DRAWER ========== -->
+  <div id="cartOverlay" class="drawer-overlay fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" onclick="toggleDrawer('cart')"></div>
+  <aside id="cartDrawer" class="drawer-right fixed top-0 right-0 bottom-0 z-[70] w-[340px] max-w-[85vw] bg-[#0f0f12] border-l border-white/5 flex flex-col">
+    <div class="flex items-center justify-between px-5 h-14 border-b border-white/5 shrink-0">
+      <span class="text-sm font-medium text-zinc-200">Your Bag (<span id="cartDrawerCount">0</span>)</span>
+      <button onclick="toggleDrawer('cart')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10">
+        <iconify-icon icon="lucide:x" width="18" class="text-zinc-400"></iconify-icon>
+      </button>
+    </div>
+    <div id="cartItems" class="flex-1 overflow-y-auto py-4 px-5"></div>
+    <div id="cartFooter" class="hidden border-t border-white/5 px-5 py-4 shrink-0">
+      <div class="flex justify-between mb-1">
+        <span class="text-sm text-zinc-400">Subtotal</span>
+        <span class="text-sm font-medium" id="cartSubtotal">₹0</span>
+      </div>
+      <div class="flex justify-between mb-4">
+        <span class="text-sm text-zinc-400">Shipping</span>
+        <span class="text-sm font-medium text-green-400">FREE</span>
+      </div>
+      <button onclick="showToast('Proceeding to checkout...')" class="w-full h-12 bg-white text-zinc-950 rounded-2xl text-sm font-medium active:scale-[0.97] transition-transform">
+        Checkout — <span id="cartTotal">₹0</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========== SEARCH OVERLAY ========== -->
+  <div id="searchOverlay" class="search-overlay fixed inset-0 z-[80] bg-[#09090b]/98 backdrop-blur-xl max-w-[480px] mx-auto">
+    <div class="px-4 pt-3 pb-2">
+      <div class="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 h-12">
+        <iconify-icon icon="lucide:search" width="18" class="text-zinc-500 shrink-0"></iconify-icon>
+        <input id="searchInput" type="search" placeholder="Search shirts, shoes, accessories..."
+          class="flex-1 bg-transparent text-sm text-white placeholder:text-zinc-500 outline-none"
+          oninput="handleSearch(this.value)" autocomplete="off">
+        <button onclick="toggleSearch()" class="text-xs text-zinc-400 font-medium shrink-0">Cancel</button>
+      </div>
+    </div>
+    <div id="searchResults" class="px-4 pt-2 pb-20 overflow-y-auto" style="height:calc(100dvh - 70px)"></div>
+  </div>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="pt-[100px] pb-[80px]">
+
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page-view active">
+      <!-- Hero Swiper -->
+      <div class="px-4 mb-6">
+        <div class="swiper hero-swiper rounded-2xl overflow-hidden" style="height:200px;">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">
+              <div class="relative h-full bg-gradient-to-br from-purple-900/80 to-zinc-900 flex items-center p-6">
+                <img src="https://picsum.photos/seed/fashhero1/600/400" class="absolute inset-0 w-full h-full object-cover" alt="">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+                <div class="relative z-10">
+                  <p class="text-[10px] uppercase tracking-widest text-lsf-300 font-medium mb-1">New Drop</p>
+                  <h2 class="text-xl font-semibold leading-tight mb-1">Summer<br>Collection '26</h2>
+                  <button onclick="switchPage('shop')" class="mt-2 px-4 py-1.5 bg-white text-zinc-950 rounded-full text-xs font-medium">Shop Now</button>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <div class="relative h-full bg-gradient-to-br from-amber-900/80 to-zinc-900 flex items-center p-6">
+                <img src="https://picsum.photos/seed/fashhero2/600/400" class="absolute inset-0 w-full h-full object-cover" alt="">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+                <div class="relative z-10">
+                  <p class="text-[10px] uppercase tracking-widest text-amber-300 font-medium mb-1">Limited Edition</p>
+                  <h2 class="text-xl font-semibold leading-tight mb-1">Streetwear<br>Essentials</h2>
+                  <button onclick="switchPage('shop')" class="mt-2 px-4 py-1.5 bg-white text-zinc-950 rounded-full text-xs font-medium">Explore</button>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <div class="relative h-full bg-gradient-to-br from-green-900/80 to-zinc-900 flex items-center p-6">
+                <img src="https://picsum.photos/seed/fashhero3/600/400" class="absolute inset-0 w-full h-full object-cover" alt="">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+                <div class="relative z-10">
+                  <p class="text-[10px] uppercase tracking-widest text-green-300 font-medium mb-1">Up to 50% Off</p>
+                  <h2 class="text-xl font-semibold leading-tight mb-1">Sports<br>Performance</h2>
+                  <button onclick="switchPage('shop')" class="mt-2 px-4 py-1.5 bg-white text-zinc-950 rounded-full text-xs font-medium">Grab Deals</button>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <div class="relative h-full bg-gradient-to-br from-rose-900/80 to-zinc-900 flex items-center p-6">
+                <img src="https://picsum.photos/seed/fashhero4/600/400" class="absolute inset-0 w-full h-full object-cover" alt="">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+                <div class="relative z-10">
+                  <p class="text-[10px] uppercase tracking-widest text-rose-300 font-medium mb-1">Exclusive</p>
+                  <h2 class="text-xl font-semibold leading-tight mb-1">Party Wear<br>Edit</h2>
+                  <button onclick="switchPage('shop')" class="mt-2 px-4 py-1.5 bg-white text-zinc-950 rounded-full text-xs font-medium">View All</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-pagination !bottom-3"></div>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between px-4 mb-3">
+          <h3 class="text-sm font-medium text-zinc-200">Shop by Category</h3>
+          <button onclick="switchPage('shop')" class="text-xs text-lsf-400 font-medium">See All</button>
+        </div>
+        <div class="flex gap-3 px-4 overflow-x-auto hide-scrollbar" id="categoryScroll"></div>
+      </div>
+
+      <!-- Flash Deal -->
+      <div class="px-4 mb-6">
+        <div class="bg-gradient-to-r from-lsf-950/80 to-zinc-900 border border-lsf-800/30 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <iconify-icon icon="lucide:zap" width="16" class="text-amber-400"></iconify-icon>
+              <span class="text-sm font-medium">Flash Deal</span>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-zinc-400">
+              <span class="bg-zinc-800 px-1.5 py-0.5 rounded font-mono text-zinc-200" id="hours">04</span>:
+              <span class="bg-zinc-800 px-1.5 py-0.5 rounded font-mono text-zinc-200" id="minutes">23</span>:
+              <span class="bg-zinc-800 px-1.5 py-0.5 rounded font-mono text-zinc-200" id="seconds">51</span>
+            </div>
+          </div>
+          <div class="flex gap-3 overflow-x-auto hide-scrollbar" id="flashDealScroll"></div>
+        </div>
+      </div>
+
+      <!-- Featured Brands -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between px-4 mb-3">
+          <h3 class="text-sm font-medium text-zinc-200">Featured Brands</h3>
+          <iconify-icon icon="lucide:arrow-right" width="16" class="text-zinc-500"></iconify-icon>
+        </div>
+        <div class="swiper brand-swiper px-4">
+          <div class="swiper-wrapper" id="brandSwiperWrapper"></div>
+        </div>
+      </div>
+
+      <!-- Trending Products -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between px-4 mb-3">
+          <h3 class="text-sm font-medium text-zinc-200">Trending Now</h3>
+          <button onclick="switchPage('shop')" class="text-xs text-lsf-400 font-medium">See All</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 px-4" id="trendingGrid"></div>
+      </div>
+
+      <!-- Season Special Banner -->
+      <div class="px-4 mb-6">
+        <div class="relative rounded-2xl overflow-hidden h-36">
+          <img src="https://picsum.photos/seed/seasonbanner/800/300" class="absolute inset-0 w-full h-full object-cover" alt="">
+          <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent"></div>
+          <div class="relative z-10 flex flex-col justify-center h-full p-5">
+            <p class="text-[10px] uppercase tracking-widest text-amber-300 font-medium mb-1">Monsoon Edit</p>
+            <h2 class="text-lg font-semibold leading-tight mb-2">Rain-Ready<br>Styles</h2>
+            <button onclick="filterByCategory('season')" class="self-start px-4 py-1.5 border border-white/20 rounded-full text-xs font-medium backdrop-blur-sm">Explore</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Arrivals -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between px-4 mb-3">
+          <h3 class="text-sm font-medium text-zinc-200">New Arrivals</h3>
+          <button onclick="switchPage('shop')" class="text-xs text-lsf-400 font-medium">See All</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 px-4" id="newArrivalsGrid"></div>
+      </div>
+    </div>
+
+    <!-- SHOP PAGE -->
+    <div id="page-shop" class="page-view">
+      <div class="px-4 mb-4">
+        <h2 class="text-lg font-semibold mb-1" id="shopTitle">All Products</h2>
+        <p class="text-xs text-zinc-500" id="shopSubtitle">Showing all items</p>
+      </div>
+      <!-- Filter Pills -->
+      <div class="flex gap-2 px-4 mb-4 overflow-x-auto hide-scrollbar" id="filterPills"></div>
+      <!-- Product Grid -->
+      <div class="grid grid-cols-2 gap-3 px-4" id="shopGrid"></div>
+    </div>
+
+    <!-- LOOKBOOK PAGE -->
+    <div id="page-lookbook" class="page-view">
+      <div class="lookbook-snap" id="lookbookContainer"></div>
+    </div>
+
+    <!-- WISHLIST PAGE -->
+    <div id="page-wishlist" class="page-view">
+      <div class="px-4 mb-4">
+        <h2 class="text-lg font-semibold mb-1">Wishlist</h2>
+        <p class="text-xs text-zinc-500" id="wishlistSubtitle">Your saved items</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3 px-4" id="wishlistGrid"></div>
+      <div id="emptyWishlist" class="hidden flex flex-col items-center justify-center py-20 px-8 text-center">
+        <iconify-icon icon="lucide:heart" width="48" class="text-zinc-700 mb-4"></iconify-icon>
+        <p class="text-sm text-zinc-400 mb-1">Your wishlist is empty</p>
+        <p class="text-xs text-zinc-600 mb-4">Save items you love for later</p>
+        <button onclick="switchPage('shop')" class="px-5 py-2 bg-white text-zinc-950 rounded-full text-xs font-medium">Start Shopping</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========== BOTTOM NAV ========== -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 max-w-[480px] mx-auto bg-[#09090b]/95 backdrop-blur-xl border-t border-white/5">
+    <div class="flex items-center justify-around h-16 px-2">
+      <button onclick="switchPage('home')" class="bottom-nav-item active flex flex-col items-center gap-0.5 py-1 px-3" data-page="home">
+        <iconify-icon icon="lucide:home" width="20" class="text-zinc-400"></iconify-icon>
+        <span class="text-[10px] text-zinc-500">Home</span>
+      </button>
+      <button onclick="switchPage('shop')" class="bottom-nav-item flex flex-col items-center gap-0.5 py-1 px-3" data-page="shop">
+        <iconify-icon icon="lucide:grid-3x3" width="20" class="text-zinc-400"></iconify-icon>
+        <span class="text-[10px] text-zinc-500">Shop</span>
+      </button>
+      <button onclick="switchPage('lookbook')" class="bottom-nav-item flex flex-col items-center gap-0.5 py-1 px-3" data-page="lookbook">
+        <iconify-icon icon="lucide:clapperboard" width="20" class="text-zinc-400"></iconify-icon>
+        <span class="text-[10px] text-zinc-500">Lookbook</span>
+      </button>
+      <button onclick="switchPage('wishlist')" class="bottom-nav-item flex flex-col items-center gap-0.5 py-1 px-3" data-page="wishlist">
+        <iconify-icon icon="lucide:heart" width="20" class="text-zinc-400"></iconify-icon>
+        <span class="text-[10px] text-zinc-500">Wishlist</span>
+      </button>
+      <button onclick="toggleDrawer('cart')" class="bottom-nav-item flex flex-col items-center gap-0.5 py-1 px-3 relative" data-page="cart">
+        <iconify-icon icon="lucide:shopping-bag" width="20" class="text-zinc-400"></iconify-icon>
+        <span class="text-[10px] text-zinc-500">Bag</span>
+        <span id="cartNavBadge" class="hidden absolute top-0 right-1 w-4 h-4 bg-lsf-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========== FLOATING WHATSAPP ========== -->
+  <a href="https://wa.me/919999999999?text=Hi!%20I%20need%20help%20with%20my%20order" target="_blank"
+    class="fixed bottom-20 left-4 z-40 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 active:scale-90 transition-transform">
+    <iconify-icon icon="lucide:message-circle" width="22" class="text-white"></iconify-icon>
+  </a>
+
+  <!-- ========== TOAST ========== -->
+  <div id="toast" class="toast fixed bottom-24 left-4 right-4 z-[90] max-w-[440px] mx-auto">
+    <div class="bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-2xl">
+      <iconify-icon icon="lucide:check-circle-2" width="18" class="text-green-400 shrink-0"></iconify-icon>
+      <span id="toastText" class="text-sm text-zinc-200"></span>
+    </div>
+  </div>
+
+  <!-- ========== PRODUCT MODAL ========== -->
+  <div id="productModal" class="fixed inset-0 z-[90] hidden">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeProductModal()"></div>
+    <div class="absolute bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-[#111114] rounded-t-3xl max-h-[85vh] overflow-y-auto" id="productModalContent"></div>
+  </div>
+
+<script>
+// ===== DATA =====
+const categories = [
+  { id: 'shirts', name: 'Shirts', icon: 'lucide:shirt', image: 'https://picsum.photos/seed/catshirt/200/200' },
+  { id: 'shoes', name: 'Shoes', icon: 'lucide:footprints', image: 'https://picsum.photos/seed/catshoes/200/200' },
+  { id: 'accessories', name: 'Accessories', icon: 'lucide:watch', image: 'https://picsum.photos/seed/catacc/200/200' },
+  { id: 'pants', name: 'Pants', icon: 'lucide:scissors', image: 'https://picsum.photos/seed/catpants/200/200' },
+  { id: 'jackets', name: 'Jackets', icon: 'lucide:shield', image: 'https://picsum.photos/seed/catjacket/200/200' },
+  { id: 'perfumes', name: 'Perfumes', icon: 'lucide:flask-conical', image: 'https://picsum.photos/seed/catperf/200/200' },
+];
+
+const brands = [
+  { name: 'LSF Essentials', tagline: 'Everyday luxury', image: 'https://picsum.photos/seed/brand1/600/300' },
+  { name: 'NØIR Studio', tagline: 'Dark aesthetic', image: 'https://picsum.photos/seed/brand2/600/300' },
+  { name: 'Aura Athletics', tagline: 'Move with purpose', image: 'https://picsum.photos/seed/brand3/600/300' },
+  { name: 'VÉCÜ', tagline: 'Italian craftsmanship', image: 'https://picsum.photos/seed/brand4/600/300' },
+  { name: 'KAZE', tagline: 'Japanese minimalism', image: 'https://picsum.photos/seed/brand5/600/300' },
+];
+
+const products = [
+  { id:1, title:'Oversized Linen Shirt', price:2499, originalPrice:3999, image:'https://picsum.photos/seed/prod1/400/500', category:'regular', catId:'shirts', tag:'New', sizes:['S','M','L','XL'] },
+  { id:2, title:'Retro Runner Sneakers', price:5499, originalPrice:7999, image:'https://picsum.photos/seed/prod2/400/500', category:'regular', catId:'shoes', tag:'Trending', sizes:['7','8','9','10','11'] },
+  { id:3, title:'Slim Fit Chinos', price:1999, originalPrice:2999, image:'https://picsum.photos/seed/prod3/400/500', category:'regular', catId:'pants', tag:'', sizes:['30','32','34','36'] },
+  { id:4, title:'Sequin Blazer', price:6999, originalPrice:12999, image:'https://picsum.photos/seed/prod4/400/500', category:'party', catId:'jackets', tag:'45% Off', sizes:['S','M','L'] },
+  { id:5, title:'Mesh Training Tee', price:1299, originalPrice:1999, image:'https://picsum.photos/seed/prod5/400/500', category:'sports', catId:'shirts', tag:'', sizes:['S','M','L','XL','XXL'] },
+  { id:6, title:'Titanium Watch', price:8999, originalPrice:14999, image:'https://picsum.photos/seed/prod6/400/500', category:'regular', catId:'accessories', tag:'Luxury', sizes:['One Size'] },
+  { id:7, title:'Silk Button-Down', price:4499, originalPrice:6999, image:'https://picsum.photos/seed/prod7/400/500', category:'party', catId:'shirts', tag:'New', sizes:['S','M','L'] },
+  { id:8, title:'Cargo Joggers', price:2299, originalPrice:3499, image:'https://picsum.photos/seed/prod8/400/500', category:'sports', catId:'pants', tag:'', sizes:['S','M','L','XL'] },
+  { id:9, title:'Leather Chelsea Boots', price:7499, originalPrice:9999, image:'https://picsum.photos/seed/prod9/400/500', category:'party', catId:'shoes', tag:'Trending', sizes:['7','8','9','10'] },
+  { id:10, title:'Windbreaker Jacket', price:3499, originalPrice:5499, image:'https://picsum.photos/seed/prod10/400/500', category:'season', catId:'jackets', tag:'Monsoon', sizes:['S','M','L','XL'] },
+  { id:11, title:'Minimalist Ring Set', price:999, originalPrice:1499, image:'https://picsum.photos/seed/prod11/400/500', category:'regular', catId:'accessories', tag:'', sizes:['One Size'] },
+  { id:12, title:'Performance Shorts', price:1599, originalPrice:2499, image:'https://picsum.photos/seed/prod12/400/500', category:'sports', catId:'pants', tag:'', sizes:['S','M','L','XL'] },
+  { id:13, title:'Floral Party Shirt', price:3299, originalPrice:5999, image:'https://picsum.photos/seed/prod13/400/500', category:'party', catId:'shirts', tag:'45% Off', sizes:['S','M','L'] },
+  { id:14, title:'Eau de Parfum 100ml', price:2999, originalPrice:4999, image:'https://picsum.photos/seed/prod14/400/500', category:'regular', catId:'perfumes', tag:'Bestseller', sizes:['100ml'] },
+  { id:15, title:'Waterproof Rain Coat', price:4999, originalPrice:7999, image:'https://picsum.photos/seed/prod15/400/500', category:'season', catId:'jackets', tag:'Monsoon', sizes:['S','M','L','XL'] },
+  { id:16, title:'Graphic Oversized Tee', price:1799, originalPrice:2499, image:'https://picsum.photos/seed/prod16/400/500', category:'regular', catId:'shirts', tag:'New', sizes:['S','M','L','XL','XXL'] },
+];
+
+const lookbookItems = [
+  { id:1, image:'https://picsum.photos/seed/look1/480/850', title:'Urban Night Out', subtitle:'Sequin Blazer + Chelsea Boots', product_id:4 },
+  { id:2, image:'https://picsum.photos/seed/look2/480/850', title:'Weekend Casual', subtitle:'Linen Shirt + Chinos', product_id:1 },
+  { id:3, image:'https://picsum.photos/seed/look3/480/850', title:'Gym to Street', subtitle:'Training Tee + Cargo Joggers', product_id:5 },
+  { id:4, image:'https://picsum.photos/seed/look4/480/850', title:'Monsoon Ready', subtitle:'Windbreaker + Retro Runners', product_id:10 },
+  { id:5, image:'https://picsum.photos/seed/look5/480/850', title:'Date Night', subtitle:'Silk Button-Down + Titanium Watch', product_id:7 },
+];
+
+// ===== STATE =====
+let cart = JSON.parse(localStorage.getItem('lsf_cart') || '[]');
+let wishlist = JSON.parse(localStorage.getItem('lsf_wishlist') || '[]');
+let currentPage = 'home';
+let currentFilter = 'all';
+
+// ===== PERSISTENCE =====
+function saveCart() { localStorage.setItem('lsf_cart', JSON.stringify(cart)); updateBadges(); renderCart(); }
+function saveWishlist() { localStorage.setItem('lsf_wishlist', JSON.stringify(wishlist)); updateBadges(); }
+
+// ===== BADGES =====
+function updateBadges() {
+  const cc = cart.reduce((s,i) => s+i.qty, 0);
+  const wc = wishlist.length;
+  const cartBadge = document.getElementById('cartCountBadge');
+  const cartNav = document.getElementById('cartNavBadge');
+  const wishBadge = document.getElementById('wishCountBadge');
+  [cartBadge, cartNav].forEach(el => {
+    if(cc>0) { el.textContent=cc; el.classList.remove('hidden'); el.classList.add('flex'); }
+    else { el.classList.add('hidden'); el.classList.remove('flex'); }
+  });
+  if(wc>0) { wishBadge.textContent=wc; wishBadge.classList.remove('hidden'); wishBadge.classList.add('flex'); }
+  else { wishBadge.classList.add('hidden'); wishBadge.classList.remove('flex'); }
+  document.getElementById('cartDrawerCount').textContent = cc;
+}
+
+// ===== DRAWERS =====
+function toggleDrawer(type) {
+  if(type==='menu') {
+    document.getElementById('menuOverlay').classList.toggle('active');
+    document.getElementById('menuDrawer').classList.toggle('active');
+  } else if(type==='cart') {
+    document.getElementById('cartOverlay').classList.toggle('active');
+    document.getElementById('cartDrawer').classList.toggle('active');
+  }
+}
+
+// ===== SEARCH =====
+function toggleSearch() {
+  const el = document.getElementById('searchOverlay');
+  el.classList.toggle('active');
+  if(el.classList.contains('active')) {
+    setTimeout(() => document.getElementById('searchInput').focus(), 300);
+  } else {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+  }
+}
+
+function handleSearch(q) {
+  const res = document.getElementById('searchResults');
+  if(!q.trim()) { res.innerHTML = renderSearchSuggestions(); return; }
+  const filtered = products.filter(p => p.title.toLowerCase().includes(q.toLowerCase()) || p.category.includes(q.toLowerCase()));
+  if(!filtered.length) {
+    res.innerHTML = `<div class="flex flex-col items-center py-16 text-center">
+      <iconify-icon icon="lucide:search-x" width="40" class="text-zinc-700 mb-3"></iconify-icon>
+      <p class="text-sm text-zinc-400">No results for "${q}"</p>
+      <p class="text-xs text-zinc-600 mt-1">Try different keywords</p>
+    </div>`;
+    return;
+  }
+  res.innerHTML = `<p class="text-xs text-zinc-500 mb-3">${filtered.length} result${filtered.length>1?'s':''}</p>` +
+    filtered.map(p => `
+      <button onclick="openProductModal(${p.id});toggleSearch()" class="w-full flex items-center gap-3 py-3 border-b border-zinc-800/50">
+        <img src="${p.image}" class="w-14 h-14 rounded-xl object-cover bg-zinc-800" alt="">
+        <div class="text-left flex-1 min-w-0">
+          <p class="text-sm text-zinc-200 truncate">${p.title}</p>
+          <p class="text-xs text-zinc-500">${p.category}</p>
+        </div>
+        <span class="text-sm font-medium text-zinc-300 shrink-0">₹${p.price.toLocaleString()}</span>
+      </button>
+    `).join('');
+}
+
+function renderSearchSuggestions() {
+  const trending = products.slice(0,5);
+  return `<p class="text-xs text-zinc-500 mb-3">Trending Searches</p>` +
+    trending.map(p => `
+      <button onclick="document.getElementById('searchInput').value='${p.title}';handleSearch('${p.title}')" class="flex items-center gap-2 py-2 text-sm text-zinc-300 hover:text-white">
+        <iconify-icon icon="lucide:trending-up" width="14" class="text-zinc-600"></iconify-icon>
+        ${p.title}
+      </button>
+    `).join('');
+}
+
+// ===== PAGE SWITCHING =====
+function switchPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.bottom-nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+  window.scrollTo({top:0, behavior:'instant'});
+  if(page==='wishlist') renderWishlist();
+  if(page==='shop') renderShop();
+  if(page==='lookbook') renderLookbook();
+}
+
+// ===== PRODUCT CARD =====
+function productCard(p) {
+  const liked = wishlist.includes(p.id);
+  const discount = Math.round((1 - p.price/p.originalPrice)*100);
+  return `
+    <div class="product-card anim-slide-up cursor-pointer" onclick="openProductModal(${p.id})">
+      <div class="relative rounded-2xl overflow-hidden bg-zinc-900 aspect-[4/5] mb-2">
+        <img src="${p.image}" class="w-full h-full object-cover" alt="${p.title}" loading="lazy">
+        ${p.tag ? `<span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/60 backdrop-blur-sm text-white border border-white/10">${p.tag}</span>` : ''}
+        <button onclick="event.stopPropagation();toggleWishlist(${p.id})" class="heart-btn ${liked?'liked':''} absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/10 active:scale-90 transition-transform">
+          <iconify-icon icon="${liked?'lucide:heart':'lucide:heart'}" width="14" class="${liked?'text-red-500':'text-white/70'}"></iconify-icon>
+        </button>
+      </div>
+      <p class="text-xs text-zinc-400 truncate px-1">${p.title}</p>
+      <div class="flex items-center gap-2 px-1 mt-0.5">
+        <span class="text-sm font-medium text-zinc-100">₹${p.price.toLocaleString()}</span>
+        <span class="text-[11px] text-zinc-600 line-through">₹${p.originalPrice.toLocaleString()}</span>
+        <span class="text-[10px] text-green-400 font-medium">${discount}% off</span>
+      </div>
+    </div>`;
+}
+
+// ===== WISHLIST =====
+function toggleWishlist(id) {
+  const idx = wishlist.indexOf(id);
+  if(idx>-1) { wishlist.splice(idx,1); showToast('Removed from wishlist'); }
+  else { wishlist.push(id); showToast('Added to wishlist'); }
+  saveWishlist();
+  // Re-render visible cards
+  if(currentPage==='home') renderHome();
+  if(currentPage==='shop') renderShop();
+  if(currentPage==='wishlist') renderWishlist();
+}
+
+// ===== CART =====
+function addToCart(id, size) {
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  const sz = size || p.sizes[0];
+  const existing = cart.find(x=>x.id===id && x.size===sz);
+  if(existing) { existing.qty++; }
+  else { cart.push({id, size:sz, qty:1}); }
+  saveCart();
+  showToast(`${p.title} added to bag`);
+}
+
+function updateQty(id, size, delta) {
+  const item = cart.find(x=>x.id===id && x.size===size);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty <= 0) cart = cart.filter(x=>!(x.id===id && x.size===size));
+  saveCart();
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  const footer = document.getElementById('cartFooter');
+  if(!cart.length) {
+    container.innerHTML = `<div class="flex flex-col items-center justify-center py-16 text-center">
+      <iconify-icon icon="lucide:shopping-bag" width="40" class="text-zinc-700 mb-3"></iconify-icon>
+      <p class="text-sm text-zinc-400 mb-1">Your bag is empty</p>
+      <p class="text-xs text-zinc-600">Add items to get started</p>
+    </div>`;
+    footer.classList.add('hidden');
+    return;
+  }
+  footer.classList.remove('hidden');
+  let total = 0;
+  container.innerHTML = cart.map(item => {
+    const p = products.find(x=>x.id===item.id);
+    if(!p) return '';
+    const sub = p.price * item.qty;
+    total += sub;
+    return `
+      <div class="flex gap-3 mb-4 pb-4 border-b border-zinc-800/50">
+        <img src="${p.image}" class="w-20 h-24 rounded-xl object-cover bg-zinc-800 shrink-0" alt="">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm text-zinc-200 truncate">${p.title}</p>
+          <p class="text-[11px] text-zinc-500 mt-0.5">Size: ${item.size}</p>
+          <p class="text-sm font-medium mt-1">₹${sub.toLocaleString()}</p>
+          <div class="flex items-center gap-2 mt-2">
+            <button onclick="updateQty(${p.id},'${item.size}',-1)" class="qty-btn w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 text-sm">−</button>
+            <span class="text-sm text-zinc-200 w-5 text-center">${item.qty}</span>
+            <button onclick="updateQty(${p.id},'${item.size}',1)" class="qty-btn w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 text-sm">+</button>
+            <button onclick="updateQty(${p.id},'${item.size}',-999)" class="ml-auto text-zinc-600 hover:text-red-400 transition-colors">
+              <iconify-icon icon="lucide:trash-2" width="14"></iconify-icon>
+            </button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('cartSubtotal').textContent = '₹'+total.toLocaleString();
+  document.getElementById('cartTotal').textContent = '₹'+total.toLocaleString();
+}
+
+// ===== PRODUCT MODAL =====
+function openProductModal(id) {
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  const liked = wishlist.includes(p.id);
+  const discount = Math.round((1 - p.price/p.originalPrice)*100);
+  const modal = document.getElementById('productModal');
+  const content = document.getElementById('productModalContent');
+  content.innerHTML = `
+    <div class="w-10 h-1 bg-zinc-700 rounded-full mx-auto mt-3 mb-2"></div>
+    <div class="relative aspect-square bg-zinc-900">
+      <img src="${p.image}" class="w-full h-full object-cover" alt="">
+      <button onclick="toggleWishlist(${p.id});openProductModal(${p.id})" class="heart-btn ${liked?'liked':''} absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/10">
+        <iconify-icon icon="lucide:heart" width="18" class="${liked?'text-red-500':'text-white/80'}"></iconify-icon>
+      </button>
+    </div>
+    <div class="p-5">
+      <div class="flex items-start justify-between mb-1">
+        <h3 class="text-base font-semibold text-zinc-100 leading-tight flex-1 mr-2">${p.title}</h3>
+        ${p.tag?`<span class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium bg-lsf-500/20 text-lsf-300 border border-lsf-500/30">${p.tag}</span>`:''}
+      </div>
+      <p class="text-xs text-zinc-500 mb-3 capitalize">${p.category} wear</p>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-xl font-semibold text-zinc-100">₹${p.price.toLocaleString()}</span>
+        <span class="text-sm text-zinc-600 line-through">₹${p.originalPrice.toLocaleString()}</span>
+        <span class="text-xs text-green-400 font-medium">${discount}% off</span>
+      </div>
+      <div class="mb-4">
+        <p class="text-xs text-zinc-400 mb-2">Select Size</p>
+        <div class="flex flex-wrap gap-2" id="modalSizes">
+          ${p.sizes.map((s,i) => `<button onclick="selectSize(this,'${s}')" class="modal-size px-4 py-2 rounded-xl text-xs font-medium border ${i===0?'border-lsf-500 bg-lsf-500/10 text-lsf-300':'border-zinc-700 text-zinc-400 bg-zinc-900'} transition-colors" data-size="${s}">${s}</button>`).join('')}
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="addToCart(${p.id}, getSelectedSize());closeProductModal()" class="flex-1 h-12 bg-white text-zinc-950 rounded-2xl text-sm font-medium active:scale-[0.97] transition-transform flex items-center justify-center gap-2">
+          <iconify-icon icon="lucide:shopping-bag" width="16"></iconify-icon>
+          Add to Bag
+        </button>
+      </div>
+      <div class="mt-4 pt-4 border-t border-zinc-800/50 grid grid-cols-3 gap-3 text-center">
+        <div class="flex flex-col items-center gap-1">
+          <iconify-icon icon="lucide:truck" width="16" class="text-zinc-500"></iconify-icon>
+          <span class="text-[10px] text-zinc-500">Free Delivery</span>
+        </div>
+        <div class="flex flex-col items-center gap-1">
+          <iconify-icon icon="lucide:refresh-ccw" width="16" class="text-zinc-500"></iconify-icon>
+          <span class="text-[10px] text-zinc-500">7-Day Return</span>
+        </div>
+        <div class="flex flex-col items-center gap-1">
+          <iconify-icon icon="lucide:shield-check" width="16" class="text-zinc-500"></iconify-icon>
+          <span class="text-[10px] text-zinc-500">Genuine</span>
+        </div>
+      </div>
+    </div>`;
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function selectSize(el, size) {
+  document.querySelectorAll('.modal-size').forEach(b => {
+    b.classList.remove('border-lsf-500','bg-lsf-500/10','text-lsf-300');
+    b.classList.add('border-zinc-700','text-zinc-400','bg-zinc-900');
+  });
+  el.classList.remove('border-zinc-700','text-zinc-400','bg-zinc-900');
+  el.classList.add('border-lsf-500','bg-lsf-500/10','text-lsf-300');
+}
+
+function getSelectedSize() {
+  const active = document.querySelector('.modal-size.border-lsf-500');
+  return active ? active.dataset.size : null;
+}
+
+// ===== RENDER FUNCTIONS =====
+function renderCategories() {
+  document.getElementById('categoryScroll').innerHTML = categories.map(c => `
+    <button onclick="filterByCatId('${c.id}')" class="category-pill flex flex-col items-center gap-2 shrink-0">
+      <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+        <img src="${c.image}" class="w-full h-full object-cover" alt="${c.name}" loading="lazy">
+      </div>
+      <span class="text-[11px] text-zinc-400">${c.name}</span>
+    </button>
+  `).join('');
+}
+
+function renderFlashDeals() {
+  const deals = products.filter(p => Math.round((1-p.price/p.originalPrice)*100) >= 35).slice(0,4);
+  document.getElementById('flashDealScroll').innerHTML = deals.map(p => {
+    const discount = Math.round((1-p.price/p.originalPrice)*100);
+    return `
+      <button onclick="openProductModal(${p.id})" class="shrink-0 w-28">
+        <div class="w-28 h-28 rounded-xl overflow-hidden bg-zinc-800 mb-1.5">
+          <img src="${p.image}" class="w-full h-full object-cover" alt="" loading="lazy">
+        </div>
+        <p class="text-[11px] text-zinc-300 truncate">${p.title}</p>
+        <div class="flex items-center gap-1">
+          <span class="text-xs font-medium text-zinc-200">₹${p.price.toLocaleString()}</span>
+          <span class="text-[10px] text-green-400">${discount}%</span>
+        </div>
+      </button>`;
+  }).join('');
+}
+
+function renderBrands() {
+  document.getElementById('brandSwiperWrapper').innerHTML = brands.map(b => `
+    <div class="swiper-slide">
+      <div class="relative h-36 rounded-2xl overflow-hidden bg-zinc-900 cursor-pointer" onclick="switchPage('shop')">
+        <img src="${b.image}" class="absolute inset-0 w-full h-full object-cover" alt="${b.name}" loading="lazy">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 p-4">
+          <p class="text-sm font-semibold text-white">${b.name}</p>
+          <p class="text-[11px] text-zinc-400">${b.tagline}</p>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderHome() {
+  renderCategories();
+  renderFlashDeals();
+  renderBrands();
+  document.getElementById('trendingGrid').innerHTML = products.filter(p=>p.tag==='Trending'||p.tag==='Bestseller').map(p => productCard(p)).join('');
+  document.getElementById('newArrivalsGrid').innerHTML = products.filter(p=>p.tag==='New').map(p => productCard(p)).join('');
+}
+
+function renderShop(filter) {
+  const f = filter || currentFilter;
+  const filtered = f==='all' ? products : products.filter(p=>p.category===f);
+  const title = f==='all' ? 'All Products' : f.charAt(0).toUpperCase()+f.slice(1)+' Wear';
+  document.getElementById('shopTitle').textContent = title;
+  document.getElementById('shopSubtitle').textContent = `${filtered.length} item${filtered.length!==1?'s':''}`;
+  const filters = ['all','regular','party','sports','season'];
+  document.getElementById('filterPills').innerHTML = filters.map(f => `
+    <button onclick="setFilter('${f}')" class="shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${f===currentFilter?'bg-white text-zinc-950':'bg-zinc-800 text-zinc-400 border border-zinc-700'}">${f==='all'?'All':f.charAt(0).toUpperCase()+f.slice(1)}</button>
+  `).join('');
+  document.getElementById('shopGrid').innerHTML = filtered.map(p => productCard(p)).join('');
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  renderShop();
+}
+
+function filterByCategory(cat) {
+  currentFilter = cat;
+  switchPage('shop');
+}
+
+function filterByCatId(catId) {
+  switchPage('shop');
+  currentFilter = 'all';
+  const filtered = products.filter(p=>p.catId===catId);
+  document.getElementById('shopTitle').textContent = categories.find(c=>c.id===catId)?.name || catId;
+  document.getElementById('shopSubtitle').textContent = `${filtered.length} item${filtered.length!==1?'s':''}`;
+  const filters = ['all','regular','party','sports','season'];
+  document.getElementById('filterPills').innerHTML = filters.map(f => `
+    <button onclick="setFilter('${f}')" class="shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${f==='all'?'bg-white text-zinc-950':'bg-zinc-800 text-zinc-400 border border-zinc-700'}">${f==='all'?'All':f.charAt(0).toUpperCase()+f.slice(1)}</button>
+  `).join('');
+  document.getElementById('shopGrid').innerHTML = filtered.map(p => productCard(p)).join('');
+}
+
+function renderWishlist() {
+  const items = products.filter(p=>wishlist.includes(p.id));
+  const grid = document.getElementById('wishlistGrid');
+  const empty = document.getElementById('emptyWishlist');
+  if(!items.length) {
+    grid.innerHTML = '';
+    grid.classList.add('hidden');
+    empty.classList.remove('hidden');
+    empty.classList.add('flex');
+  } else {
+    empty.classList.add('hidden');
+    empty.classList.remove('flex');
+    grid.classList.remove('hidden');
+    grid.innerHTML = items.map(p => productCard(p)).join('');
+  }
+  document.getElementById('wishlistSubtitle').textContent = items.length ? `${items.length} saved item${items.length>1?'s':''}` : 'Your saved items';
+}
+
+function renderLookbook() {
+  document.getElementById('lookbookContainer').innerHTML = lookbookItems.map(item => `
+    <div class="lookbook-item relative flex items-end">
+      <img src="${item.image}" class="absolute inset-0 w-full h-full object-cover" alt="" loading="lazy">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+      <div class="relative z-10 p-6 pb-10 w-full">
+        <p class="text-[10px] uppercase tracking-widest text-lsf-300 font-medium mb-1">Look ${item.id}</p>
+        <h3 class="text-xl font-semibold mb-1">${item.title}</h3>
+        <p class="text-sm text-zinc-400 mb-4">${item.subtitle}</p>
+        <div class="flex gap-3">
+          <button onclick="openProductModal(${item.product_id})" class="px-5 py-2.5 bg-white text-zinc-950 rounded-full text-xs font-medium active:scale-95 transition-transform flex items-center gap-2">
+            <iconify-icon icon="lucide:shopping-bag" width="14"></iconify-icon>
+            Shop This Look
+          </button>
+          <button onclick="toggleWishlist(${item.product_id})" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center active:scale-90 transition-transform">
+            <iconify-icon icon="lucide:heart" width="16" class="text-white"></iconify-icon>
+          </button>
+        </div>
+      </div>
+      <!-- Scroll indicator dots -->
+      <div class="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 z-10">
+        ${lookbookItems.map((_,i) => `<div class="w-1 h-1 rounded-full ${i===item.id-1?'bg-white h-3':'bg-white/30'}"></div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ===== COUNTDOWN TIMER =====
+function startCountdown() {
+  let total = 4*3600 + 23*60 + 51;
+  function tick() {
+    if(total <= 0) total = 24*3600;
+    const h = Math.floor(total/3600);
+    const m = Math.floor((total%3600)/60);
+    const s = total%60;
+    document.getElementById('hours').textContent = String(h).padStart(2,'0');
+    document.getElementById('minutes').textContent = String(m).padStart(2,'0');
+    document.getElementById('seconds').textContent = String(s).padStart(2,'0');
+    total--;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderHome();
+  renderCart();
+  updateBadges();
+  startCountdown();
+
+  // Init Hero Swiper
+  new Swiper('.hero-swiper', {
+    loop: true,
+    autoplay: { delay: 4000, disableOnInteraction: false },
+    pagination: { el: '.swiper-pagination', clickable: true },
+    effect: 'slide',
+    speed: 500,
+  });
+
+  // Init Brand Swiper
+  new Swiper('.brand-swiper', {
+    slidesPerView: 'auto',
+    spaceBetween: 12,
+    speed: 400,
+  });
+
+  // Close modals on escape
+  document.addEventListener('keydown', e => {
+    if(e.key==='Escape') {
+      if(document.getElementById('searchOverlay').classList.contains('active')) toggleSearch();
+      else if(!document.getElementById('productModal').classList.contains('hidden')) closeProductModal();
+      else if(document.getElementById('menuDrawer').classList.contains('active')) toggleDrawer('menu');
+      else if(document.getElementById('cartDrawer').classList.contains('active')) toggleDrawer('cart');
+    }
+  });
+
+  // Initial search suggestions
+  document.getElementById('searchResults').innerHTML = renderSearchSuggestions();
+});
+</script>
+
+</body>
+</html>
